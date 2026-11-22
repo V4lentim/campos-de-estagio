@@ -1,17 +1,19 @@
 export class ApiError extends Error {
   constructor(status, data) {
-    super(
-      typeof data?.message === 'string'
-        ? data.message
-        : `A requisição falhou (HTTP ${status}).`,
+    const messages = [data?.error, data?.mensagem, data?.message];
+
+    const message = messages.find(
+      (value) => typeof value === 'string' && value.trim().length > 0,
     );
+
+    super(message ?? `A requisição falhou (HTTP ${status}).`);
+
     this.name = 'ApiError';
     this.status = status;
     this.data = data;
   }
 }
 
-/** Cria um transporte HTTP sem depender do formato das entidades da API. */
 export function createApiClient(baseUrl) {
   return async function request(path, { json, headers, ...options } = {}) {
     if (!baseUrl?.trim()) {
@@ -20,7 +22,12 @@ export function createApiClient(baseUrl) {
       );
     }
 
+    if (json !== undefined && options.body !== undefined) {
+      throw new Error('Informe apenas json ou body na requisição.');
+    }
+
     const url = `${baseUrl.trim().replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+
     const requestHeaders = new Headers(headers);
 
     if (json !== undefined) {
@@ -28,21 +35,31 @@ export function createApiClient(baseUrl) {
       options.body = JSON.stringify(json);
     }
 
-    const response = await fetch(url, { ...options, headers: requestHeaders });
+    const response = await fetch(url, {
+      ...options,
+      headers: requestHeaders,
+    });
+
     const text = await response.text();
-    const isJson = response.headers.get('Content-Type')?.includes('json');
+
+    const contentType =
+      response.headers.get('Content-Type')?.toLowerCase() ?? '';
+
     let data = text || null;
 
-    if (text && isJson) {
+    if (text && contentType.includes('json')) {
       try {
         data = JSON.parse(text);
       } catch (error) {
-        // Um erro HTTP deve conservar seu status mesmo com um corpo malformado.
+        // Preserva o status HTTP quando um corpo de erro contém JSON inválido.
         if (response.ok) throw error;
       }
     }
 
-    if (!response.ok) throw new ApiError(response.status, data);
+    if (!response.ok) {
+      throw new ApiError(response.status, data);
+    }
+
     return data;
   };
 }
