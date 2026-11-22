@@ -72,9 +72,7 @@ export default function LoginPage() {
           <div>
             <h2 id="login-title">Entrar na Plataforma</h2>
 
-            <p className="muted">
-              Informe suas credenciais para continuar.
-            </p>
+            <p className="muted">Informe suas credenciais para continuar.</p>
           </div>
 
           <Field

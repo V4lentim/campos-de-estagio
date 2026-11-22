@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import { navigation, routes } from '../constants/routes.js';
+import { navigation } from '../constants/routes.js';
 import { useAuth } from '../hooks/useAuth.js';
 import Button from '../components/ui/Button.jsx';
 import Sidebar from './Sidebar.jsx';
@@ -9,23 +9,16 @@ export default function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const { sessao } = useAuth();
-  const group = navigation.find(({ items }) =>
+  const grupo = navigation.find(({ items }) =>
     items.some(({ to }) => pathname === to || pathname.startsWith(`${to}/`)),
   );
-  const item = group?.items.find(
+  const item = grupo?.items.find(
     ({ to }) => pathname === to || pathname.startsWith(`${to}/`),
   );
-  const title =
-    pathname === routes.campoExemplo
-      ? 'Ficha do Campo'
-      : pathname === routes.preceptorExemplo
-        ? 'Ficha do Preceptor'
-        : item?.label;
-
   return (
     <div className={`app-layout${menuOpen ? ' menu-open' : ''}`}>
       <a className="skip-link" href="#main-content">
-        Pular para o conteÃºdo
+        Pular para o conteúdo
       </a>
       <Sidebar onNavigate={() => setMenuOpen(false)} />
       <div className="app-layout__main">
@@ -40,8 +33,8 @@ export default function AppLayout() {
             {menuOpen ? 'Fechar menu' : 'Abrir menu'}
           </Button>
           <div>
-            <span className="eyebrow">{group?.title}</span>
-            <h1>{title}</h1>
+            <span className="eyebrow">{grupo?.title}</span>
+            <h1>{item?.label ?? 'Campos de estágio'}</h1>
           </div>
           <span className="badge profile-badge">{sessao?.papel}</span>
         </header>

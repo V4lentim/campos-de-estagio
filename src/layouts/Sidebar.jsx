@@ -6,18 +6,25 @@ import Button from '../components/ui/Button.jsx';
 
 export default function Sidebar({ onNavigate }) {
   const { sessao, logout } = useAuth();
-
+  const grupos = navigation
+    .map((grupo) => ({
+      ...grupo,
+      items: grupo.items.filter(
+        (item) => !item.admin || sessao?.papel === 'ADMIN',
+      ),
+    }))
+    .filter((grupo) => grupo.items.length > 0);
   return (
     <aside className="sidebar" id="main-menu">
-      <Link to={routes.painel} className="sidebar__brand" onClick={onNavigate}>
+      <Link to={routes.campos} className="sidebar__brand" onClick={onNavigate}>
         <img src={logo} alt="FAMINAS" />
         <span>Campos de Estágio</span>
       </Link>
       <nav aria-label="Navegação principal">
-        {navigation.map((group) => (
-          <div className="sidebar__group" key={group.title}>
-            <p>{group.title}</p>
-            {group.items.map((item) => (
+        {grupos.map((grupo) => (
+          <div className="sidebar__group" key={grupo.title}>
+            <p>{grupo.title}</p>
+            {grupo.items.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
@@ -37,7 +44,6 @@ export default function Sidebar({ onNavigate }) {
           <strong>{sessao?.papel}</strong>
           <span>Perfil de acesso</span>
         </div>
-
         <Button
           variant="secondary"
           onClick={() => {
