@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { routes } from './constants/routes.js';
-import PreviewProvider from './contexts/PreviewProvider.jsx';
+import AuthProvider from './contexts/AuthProvider.jsx';
+import ProtectedRoute from './components/shared/ProtectedRoute.jsx';
 import AppLayout from './layouts/AppLayout.jsx';
 import LoginPage from './pages/login/LoginPage.jsx';
 import PainelPage from './pages/painel/PainelPage.jsx';
@@ -24,29 +25,33 @@ import './styles/global.css';
 export default function App() {
   return (
     <BrowserRouter>
-      <PreviewProvider>
+      <AuthProvider>
         <Routes>
           <Route path={routes.login} element={<LoginPage />} />
-          <Route element={<AppLayout />}>
-            <Route path={routes.painel} element={<PainelPage />} />
-            <Route path={routes.campos} element={<CamposPage />} />
-            <Route path={routes.campoExemplo} element={<CampoPage />} />
-            <Route path={routes.consultorios} element={<ConsultoriosPage />} />
-            <Route path={routes.preceptores} element={<PreceptoresPage />} />
-            <Route path={routes.preceptorExemplo} element={<PreceptorPage />} />
-            <Route path={routes.vinculos} element={<VinculosPage />} />
-            <Route path={routes.contratos} element={<ContratosPage />} />
-            <Route path={routes.alocacoes} element={<AlocacoesPage />} />
-            <Route path={routes.faixas} element={<FaixasPage />} />
-            <Route path={routes.importacoes} element={<ImportacoesPage />} />
-            <Route path={routes.distribuicao} element={<DistribuicaoPage />} />
-            <Route path={routes.simulador} element={<SimuladorPage />} />
-            <Route path={routes.mapa} element={<MapaPage />} />
-            <Route path={routes.avaliacoes} element={<AvaliacoesPage />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path={routes.painel} element={<PainelPage />} />
+              <Route path={routes.campos} element={<CamposPage />} />
+              <Route path={routes.campoExemplo} element={<CampoPage />} />
+              <Route path={routes.consultorios} element={<ConsultoriosPage />} />
+              <Route path={routes.preceptores} element={<PreceptoresPage />} />
+              <Route path={routes.preceptorExemplo} element={<PreceptorPage />} />
+              <Route path={routes.vinculos} element={<VinculosPage />} />
+              <Route path={routes.contratos} element={<ContratosPage />} />
+              <Route path={routes.alocacoes} element={<AlocacoesPage />} />
+              <Route path={routes.faixas} element={<FaixasPage />} />
+              <Route path={routes.importacoes} element={<ImportacoesPage />} />
+              <Route path={routes.distribuicao} element={<DistribuicaoPage />} />
+              <Route path={routes.simulador} element={<SimuladorPage />} />
+              <Route path={routes.mapa} element={<MapaPage />} />
+              <Route path={routes.avaliacoes} element={<AvaliacoesPage />} />
+            </Route>
           </Route>
+
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-      </PreviewProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

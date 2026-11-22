@@ -1,76 +1,115 @@
-import { useNavigate } from 'react-router';
+import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router';
 import logo from '../../assets/images/logo-faminas-white.png';
 import Button from '../../components/ui/Button.jsx';
 import { Field } from '../../components/ui/Field.jsx';
-import { profiles } from '../../constants/preview.js';
 import { routes } from '../../constants/routes.js';
-import { usePreviewProfile } from '../../hooks/usePreviewProfile.js';
+import { useAuth } from '../../hooks/useAuth.js';
+import { ApiError } from '../../services/api.js';
 
 export default function LoginPage() {
-  const { profile, setProfile } = usePreviewProfile();
+  const { sessao, login } = useAuth();
   const navigate = useNavigate();
+
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
+
+  if (sessao) {
+    return <Navigate to={routes.campos} replace />;
+  }
+
+  async function entrar(event) {
+    event.preventDefault();
+
+    if (carregando) return;
+
+    setErro('');
+    setCarregando(true);
+
+    try {
+      await login(email, senha);
+
+      setSenha('');
+      navigate(routes.campos, { replace: true });
+    } catch (error) {
+      setErro(
+        error instanceof ApiError
+          ? error.message
+          : 'Não foi possível entrar. Confira a conexão com a API e tente novamente.',
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
 
   return (
     <main className="login-page">
       <section className="login-brand">
         <img src={logo} alt="FAMINAS" />
+
         <div className="stack">
           <span className="eyebrow">Coordenação de Medicina</span>
+
           <h1>Gestão de Campos de Estágio</h1>
+
           <p>
-            Cadastro de campos e consultórios, alunos e alocações, faixas de
-            ocupação e importação em lote. Preceptores, contratos, painel e
-            simulação são funcionalidades extras, de escolha do grupo.
+            Gestão de campos, consultórios, alunos, alocações, preceptores e
+            avaliações.
           </p>
-          <div className="inline-actions">
-            <span className="badge">Contrato comum</span>
-            <span className="badge">Extras opcionais</span>
-          </div>
         </div>
-        <small>Desenvolvimento de APIs · Base para os projetos da turma</small>
+
+        <small>Projeto acadêmico · Gestão de Campos de Estágio</small>
       </section>
+
       <section className="login-panel" aria-labelledby="login-title">
-        <div className="login-form stack">
+        <form
+          className="login-form stack"
+          onSubmit={entrar}
+          aria-busy={carregando}
+        >
           <div>
             <h2 id="login-title">Entrar na Plataforma</h2>
-            <p className="muted">Conheça as telas do projeto.</p>
+
+            <p className="muted">
+              Informe suas credenciais para continuar.
+            </p>
           </div>
+
           <Field
-            label="E-mail institucional"
+            label="E-mail"
+            name="email"
             type="email"
+            autoComplete="username"
             placeholder="nome@exemplo.com"
-            disabled
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            disabled={carregando}
+            required
           />
+
           <Field
             label="Senha"
+            name="senha"
             type="password"
-            placeholder="Disponível após a integração"
-            disabled
+            autoComplete="current-password"
+            value={senha}
+            onChange={(event) => setSenha(event.target.value)}
+            disabled={carregando}
+            required
           />
-          <fieldset className="profile-picker">
-            <legend>Perfil de acesso</legend>
-            <div className="profile-picker__options">
-              {profiles.map((item) => (
-                <Button
-                  key={item}
-                  variant="secondary"
-                  aria-pressed={profile === item}
-                  onClick={() => setProfile(item)}
-                >
-                  {item}
-                </Button>
-              ))}
-            </div>
-          </fieldset>
-          <Button onClick={() => navigate(routes.painel)}>
-            Explorar a prévia
+
+          {erro && (
+            <p className="notice notice--warning" role="alert">
+              {erro}
+            </p>
+          )}
+
+          <Button type="submit" disabled={carregando}>
+            {carregando ? 'Entrando...' : 'Entrar'}
           </Button>
-          <p className="login-note">
-            Modo de demonstração, sem autenticação. O perfil selecionado apenas
-            identifica a navegação; todas as telas ficam acessíveis. Na API, o
-            ADMIN pode tudo e a CONSULTA só lê.
-          </p>
-        </div>
+        </form>
       </section>
     </main>
   );

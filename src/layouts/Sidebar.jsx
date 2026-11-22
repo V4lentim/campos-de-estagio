@@ -1,10 +1,11 @@
 import { NavLink, Link } from 'react-router';
 import logo from '../assets/images/logo-faminas-white.png';
 import { navigation, routes } from '../constants/routes.js';
-import { usePreviewProfile } from '../hooks/usePreviewProfile.js';
+import { useAuth } from '../hooks/useAuth.js';
+import Button from '../components/ui/Button.jsx';
 
 export default function Sidebar({ onNavigate }) {
-  const { profile } = usePreviewProfile();
+  const { sessao, logout } = useAuth();
 
   return (
     <aside className="sidebar" id="main-menu">
@@ -33,12 +34,19 @@ export default function Sidebar({ onNavigate }) {
       </nav>
       <div className="sidebar__footer">
         <div>
-          <strong>{profile}</strong>
-          <span>Perfil de demonstração</span>
+          <strong>{sessao?.papel}</strong>
+          <span>Perfil de acesso</span>
         </div>
-        <Link to={routes.login} onClick={onNavigate}>
-          Voltar ao início
-        </Link>
+
+        <Button
+          variant="secondary"
+          onClick={() => {
+            logout();
+            onNavigate?.();
+          }}
+        >
+          Sair
+        </Button>
       </div>
     </aside>
   );

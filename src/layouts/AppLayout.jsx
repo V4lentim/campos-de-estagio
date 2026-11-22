@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { navigation, routes } from '../constants/routes.js';
-import { usePreviewProfile } from '../hooks/usePreviewProfile.js';
+import { useAuth } from '../hooks/useAuth.js';
 import Button from '../components/ui/Button.jsx';
 import Sidebar from './Sidebar.jsx';
 
 export default function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
-  const { profile } = usePreviewProfile();
+  const { sessao } = useAuth();
   const group = navigation.find(({ items }) =>
     items.some(({ to }) => pathname === to || pathname.startsWith(`${to}/`)),
   );
@@ -25,7 +25,7 @@ export default function AppLayout() {
   return (
     <div className={`app-layout${menuOpen ? ' menu-open' : ''}`}>
       <a className="skip-link" href="#main-content">
-        Pular para o conteúdo
+        Pular para o conteÃºdo
       </a>
       <Sidebar onNavigate={() => setMenuOpen(false)} />
       <div className="app-layout__main">
@@ -43,12 +43,8 @@ export default function AppLayout() {
             <span className="eyebrow">{group?.title}</span>
             <h1>{title}</h1>
           </div>
-          <span className="badge profile-badge">{profile}</span>
+          <span className="badge profile-badge">{sessao?.papel}</span>
         </header>
-        <div className="preview-banner">
-          Prévia do projeto · Os dados e as ações estarão disponíveis após a
-          integração.
-        </div>
         <main id="main-content" className="page-content" tabIndex={-1}>
           <Outlet />
         </main>
