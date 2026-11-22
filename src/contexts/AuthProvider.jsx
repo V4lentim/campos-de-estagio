@@ -6,7 +6,7 @@ import {
   limparSessao,
   salvarSessao,
 } from '../services/sessao.js';
-import { AuthContext } from '../AuthContext.js';
+import { AuthContext } from './AuthContext.js';
 
 export default function AuthProvider({ children }) {
   const [sessao, setSessao] = useState(lerSessao);
