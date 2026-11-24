@@ -9,6 +9,21 @@ let request;
 
 before(async () => {
   server = createServer(async (req, res) => {
+    if (req.url.startsWith('/api/padronizado/')) {
+      const status = Number(req.url.split('/').at(-1));
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          erro: {
+            codigo: 'CODIGO_DE_TESTE',
+            mensagem: `Mensagem da API (${status})`,
+            detalhes: [{ campo: 'nome', problema: 'obrigatório' }],
+            evidencia: { alunosNoConsultorio: 4, ideal: 2, maximoAceitavel: 3 },
+          },
+        }),
+      );
+      return;
+    }
     if (req.url === '/api/empty') {
       res.writeHead(204).end();
       return;
@@ -128,3 +143,23 @@ test('avisa quando a URL da API ainda não foi configurada', async () => {
   const unconfiguredRequest = createApiClient('');
   await assert.rejects(unconfiguredRequest('campos'), /VITE_API_BASE_URL/);
 });
+
+for (const status of [400, 401, 403, 404, 409, 413, 429, 500]) {
+  test(`lê o contrato padronizado e preserva código e detalhes (${status})`, async () => {
+    await assert.rejects(request(`padronizado/${status}`), (error) => {
+      assert.equal(error.status, status);
+      assert.equal(error.message, `Mensagem da API (${status})`);
+      assert.equal(error.codigo, 'CODIGO_DE_TESTE');
+      assert.deepEqual(error.detalhes, [
+        { campo: 'nome', problema: 'obrigatório' },
+      ]);
+      assert.deepEqual(error.evidencia, {
+        alunosNoConsultorio: 4,
+        ideal: 2,
+        maximoAceitavel: 3,
+      });
+      assert.equal(error.data.erro.codigo, error.codigo);
+      return true;
+    });
+  });
+}

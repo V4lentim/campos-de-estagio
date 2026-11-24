@@ -20,7 +20,7 @@ export default function Feedback({ erro, mensagem }) {
       role={erro ? 'alert' : 'status'}
     >
       <p>{texto ?? mensagem}</p>
-      <Evidencia evidencia={erro?.data?.evidencia} />
+      <Evidencia evidencia={erro?.evidencia ?? erro?.data?.evidencia} />
     </div>
   );
 }

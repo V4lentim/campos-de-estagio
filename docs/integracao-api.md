@@ -88,10 +88,18 @@ envelopes: JSON vira objeto/array, texto permanece texto e corpo vazio retorna
 `null`. Um corpo anunciado como JSON mas malformado em uma resposta de sucesso
 gera `SyntaxError`, indicando quebra de contrato.
 
-Erros HTTP geram `ApiError`, com `status` e `data`. Se o corpo JSON contiver uma
-`message` de texto, ela será usada como mensagem; outros formatos, como
-`{ errors: [...] }`, ficam disponíveis em `data` para o grupo interpretar.
+Erros HTTP geram `ApiError`, com `status` e o corpo original em `data`.
+A API utiliza `{ erro: { codigo, mensagem } }`; o cliente lê `erro.mensagem`
+e disponibiliza `codigo`, `detalhes` e `evidencia` quando presentes.
+O componente compartilhado `Feedback` apresenta a evidência dos bloqueios de
+ocupação. A leitura dos formatos anteriores (`error`, `mensagem` e `message`
+na raiz) foi mantida para a transição de publicação.
 Falhas de rede e cancelamentos conservam os erros de `fetch`.
+
+O login aceita JSON até 10 KB e tem limite padrão de 5 requisições por IP em
+15 minutos. Exceder a cota retorna 429 com a mensagem da API e `Retry-After`.
+Os cadastros aceitam JSON até 100 KB e a importação até 1 MB; exceder o limite
+retorna 413. Essas respostas são exibidas pelo mesmo componente de erro.
 
 ## 3. Ligar a resposta à página
 

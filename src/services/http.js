@@ -1,6 +1,11 @@
 export class ApiError extends Error {
   constructor(status, data) {
-    const messages = [data?.error, data?.mensagem, data?.message];
+    const messages = [
+      data?.erro?.mensagem,
+      data?.error,
+      data?.mensagem,
+      data?.message,
+    ];
 
     const message = messages.find(
       (value) => typeof value === 'string' && value.trim().length > 0,
@@ -10,6 +15,14 @@ export class ApiError extends Error {
 
     this.name = 'ApiError';
     this.status = status;
+    this.codigo =
+      typeof data?.erro?.codigo === 'string'
+        ? data.erro.codigo
+        : typeof data?.erro === 'string'
+          ? data.erro
+          : undefined;
+    this.detalhes = data?.erro?.detalhes;
+    this.evidencia = data?.erro?.evidencia ?? data?.evidencia;
     this.data = data;
   }
 }
